@@ -56,6 +56,7 @@ class Frame(ABC):
             else:
                 return f"{self.rolls[0].pins} | {self.rolls[1].pins}"
 
+
 class NormalFrame(Frame):
     def __init__(self):
         super().__init__()
@@ -107,7 +108,6 @@ class TenthFrame(Frame):
 
 
 class Game:
-
     MAX_FRAMES = 10
 
     def __init__(self):
@@ -150,5 +150,4 @@ class Game:
     def score(self) -> int:
         if self.current_frame_index < Game.MAX_FRAMES - 1:
             raise IndexError("There are not enough frames to calculate score")
-
         return sum(frame.score() for frame in self.frames)

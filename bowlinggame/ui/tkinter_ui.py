@@ -1,4 +1,4 @@
-from tkinter import Tk, Frame, Label, Entry, messagebox
+from tkinter import Frame, Label, Entry, messagebox, filedialog
 from tkinter.constants import TOP, X, SOLID, W, LEFT, END
 from tkinter.ttk import Button
 from customtkinter import CTk
@@ -38,6 +38,7 @@ class BowlingFrame(Frame):
 
     def activate(self):
         self.frame_label.config(bg="lightgreen")
+
 
 class BowlingApp(CTk):
     def __init__(self, game: Game):
@@ -106,7 +107,12 @@ class BowlingApp(CTk):
         self.unbind("<Visibility>")
 
     def reset(self):
-        pass
+        for frame in self.frames:
+            frame.update_rolls(None)
+            frame.update_score(None)
+        self.create_action_panel()
+        self.create_frames()
+        self.frames[0].activate()
 
     def add_roll(self):
         try:
@@ -114,10 +120,11 @@ class BowlingApp(CTk):
             if roll < 0:
                 message = "Roll must be a positive integer value"
                 messagebox.showwarning(title="Validation error", message=message, parent=self)
-            else:
+            elif self.game.current_frame_index <= 10:
                 self.game.roll(roll)
                 self.frames[self.game.current_frame_index].activate()
                 self.update_frames()
+
         except ValueError:
             message = "Roll must be an integer value"
             messagebox.showwarning(title="Validation error", message=message, parent=self)
@@ -128,7 +135,20 @@ class BowlingApp(CTk):
             self.add_roll_entry.focus()
 
     def load_from_file(self):
-        pass
+        archivo = filedialog.askopenfilename(title="Select File")
+        with open(f'{archivo}', encoding="utf-8") as file:
+            read_data = file.read()
+        for dato in range(len(read_data)):
+            if read_data[dato] == "/":
+                read_data = read_data.replace("/", str(10 - int(read_data[dato - 2])))
+            else:
+                continue
+        data = read_data.replace("X", "10")
+        data = data.split(" ")
+        for roll in data:
+            self.game.roll(int(roll))
+            self.frames[self.game.current_frame_index].activate()
+            self.update_frames()
 
     def update_frames(self):
         for i, frame in enumerate(self.game.frames):
